@@ -1,17 +1,16 @@
 """
-sample_data.py — Load Sample Transactions for Testing
+sample_data.py — Load Sample Transactions for Guest Trials
 
 This script adds ~30 realistic transactions (income + expenses) so you can
 immediately see the dashboard in action without entering data manually.
 
 Usage:
-    - Called from the Streamlit sidebar via a button
-    - Can also be run directly: python sample_data.py
+    - Called only by the isolated Streamlit guest trial flow
 """
 
 from datetime import date, timedelta
 import random
-from database import add_transaction, clear_all_transactions, init_db
+from database import add_transaction, get_transaction_count, get_connection
 
 # ─── Sample Transactions ────────────────────────────────────────────────────
 # Each tuple: (days_ago, type, category, amount, description)
@@ -68,14 +67,20 @@ SAMPLE_TRANSACTIONS = [
 ]
 
 
-def load_sample_data():
+def load_sample_data(owner_id):
     """
-    Clear existing data and load fresh sample transactions.
+    Add demo transactions only to an empty isolated trial guest profile.
 
     Dates are calculated relative to today so the data always
     looks recent and relevant.
     """
-    clear_all_transactions()
+    conn = get_connection()
+    user = conn.execute("SELECT username FROM users WHERE id=?", (owner_id,)).fetchone()
+    conn.close()
+    if not user or not user["username"].startswith("trial-"):
+        raise ValueError("Sample data is available only in an isolated guest trial.")
+    if get_transaction_count(owner_id) > 0:
+        raise ValueError("Demo data can only be loaded into an empty database.")
 
     today = date.today()
     for days_ago, txn_type, category, amount, description in SAMPLE_TRANSACTIONS:
@@ -83,12 +88,6 @@ def load_sample_data():
         # Add a small random variation to amounts for realism
         variation = random.uniform(0.95, 1.05)
         adjusted_amount = round(amount * variation, 2)
-        add_transaction(txn_date, txn_type, category, adjusted_amount, description)
+        add_transaction(txn_date, txn_type, category, adjusted_amount, description, owner_id=owner_id)
 
     print(f"[OK] Loaded {len(SAMPLE_TRANSACTIONS)} sample transactions!")
-
-
-# Allow running this file directly
-if __name__ == "__main__":
-    init_db()
-    load_sample_data()

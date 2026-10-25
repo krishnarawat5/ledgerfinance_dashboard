@@ -1,138 +1,49 @@
-# 💰 Personal Finance Dashboard
+# Ledger — Personal Finance Dashboard
 
-A clean, modern **Personal Finance Dashboard** built with Python and Streamlit.
-Track your income, expenses, savings, and manage your money using the **6 Jars Budget System**.
+A local-first personal finance app built with Streamlit, pandas, Plotly, and SQLite.
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io)
+## Features
 
----
+- Month-based overview with prior-month comparisons and cash-flow charts
+- Transaction entry, editing, search, and confirmed deletion
+- Multiple accounts, opening balances, and account-to-account transfers
+- Recurring income and expense schedules with deliberate posting when due
+- Monthly category budgets and over-budget indicators
+- CSV/Excel import-export, PDF transaction reports, and full JSON backup/restore
+- Local login with per-user finance records
+- Optional isolated guest trial with sample data
+- Savings goals and an SIP estimate calculator
+- Latest available SENSEX close and Indian IBJA gold/silver benchmark rates
+- Expense trend forecast estimates and rule-based financial insights
 
-## ✨ Features
+## Run locally
 
-- **📊 Dashboard** — KPI cards showing total income, expenses, savings, and savings rate with interactive charts
-- **💰 Transactions** — Add, edit, and delete income/expense entries with category tagging
-- **🏺 Jar System** — Divide your income into budget jars (Necessities, Education, Savings, Entertainment, Giving, Financial Freedom)
-- **📈 Analytics** — Category breakdowns, daily trends, income vs expense comparison, top expenses
-- **💾 Persistent Storage** — SQLite database saves your data during each session
-- **🧪 Sample Data** — One-click sample data loader for immediate testing
-
----
-
-## 🚀 Deploy to Streamlit Community Cloud
-
-### Step 1: Push to GitHub
-
-This folder must be its **own GitHub repository** (not inside another project).
-
-```bash
-cd c:\Users\rawat\Downloads\AI_Chatbot\finance_dashboard
-
-# Initialize git repo
-git init
-git add .
-git commit -m "Initial commit: Personal Finance Dashboard"
-
-# Create a new repo on GitHub (e.g., 'finance-dashboard'), then:
-git remote add origin https://github.com/YOUR_USERNAME/finance-dashboard.git
-git branch -M main
-git push -u origin main
-```
-
-### Step 2: Deploy on Streamlit Cloud
-
-1. Go to [share.streamlit.io](https://share.streamlit.io)
-2. Sign in with your **GitHub** account
-3. Click **"New app"**
-4. Select your **repository**: `YOUR_USERNAME/finance-dashboard`
-5. Set **Branch**: `main`
-6. Set **Main file path**: `app.py`
-7. Click **"Deploy!"**
-
-Your app will be live at: `https://YOUR_APP_NAME.streamlit.app`
-
-### Step 3: Access Your Dashboard
-
-Once deployed, you'll get a public URL like:
-```
-https://finance-dashboard-yourname.streamlit.app
-```
-
-Share this URL with anyone — no installation needed!
-
----
-
-## 🏃 Run Locally (Development)
-
-```bash
-cd c:\Users\rawat\Downloads\AI_Chatbot\finance_dashboard
+```powershell
 python -m venv .venv
-.venv\Scripts\activate
+.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Opens at **http://localhost:8501**.
+The SQLite database (`finance.db`) is created beside `database.py` on first launch. Existing finance records are retained and assigned to the first Ledger account created after this upgrade. Create a local account from the login screen. The database is excluded from Git. Download a full JSON backup regularly from **Data & reports**.
 
----
+In VS Code, open the project folder and choose **Python: Select Interpreter** from the Command Palette, then select `.venv\Scripts\python.exe`. The workspace also includes a Streamlit debug profile; use **Run and Debug → Streamlit: Finance Dashboard** or run `python -m streamlit run app.py` in a terminal with `.venv` active.
 
-## 📁 Project Structure
+## Market data and estimates
 
-```
-finance_dashboard/
-├── .streamlit/
-│   └── config.toml         # Streamlit theme & server config
-├── .gitignore               # Files excluded from git
-├── app.py                   # Main Streamlit application (4 pages)
-├── database.py              # SQLite database operations (CRUD + queries)
-├── sample_data.py           # Sample transaction loader for testing
-├── requirements.txt         # Python dependencies
-└── README.md                # This file
-```
+Market prices use Yahoo Finance data through yfinance for the latest available SENSEX daily close, plus the latest published IBJA benchmark for 999-purity gold (per 10 g) and silver (per kg). Quotes can be delayed or unavailable; the app shows an error instead of inventing a value. IBJA bullion rates exclude GST and jewellery making charges, and can differ from local retail prices and MCX futures. SIP and expense projections are estimates based on user-entered assumptions or past records and are not guarantees.
 
----
+## Deployment
 
-## 🏺 The 6 Jars System
+The app includes local username/password login, but it has not been designed or audited as a public multi-user service. It is intended for local use. Do not deploy it publicly with personal financial records without an independent security review, durable storage, TLS, and operational protections. Hosted ephemeral filesystems may lose SQLite data after restarts or redeployments.
 
-| Jar | Default % | Purpose |
-|-----|-----------|---------|
-| 🏠 Necessities | 55% | Rent, bills, groceries, essentials |
-| 📚 Education | 10% | Books, courses, self-improvement |
-| 💰 Savings | 10% | Emergency fund, long-term savings |
-| 🎮 Entertainment | 10% | Fun, movies, dining out, hobbies |
-| 🎁 Giving | 5% | Gifts, charity, donations |
-| 💸 Financial Freedom | 10% | Investments, side business |
+## Project files
 
-You can customize the percentages in the **Jar System** page.
-
----
-
-## ⚠️ Important: Cloud Storage Note
-
-Streamlit Community Cloud uses **ephemeral storage** — the SQLite database resets when the app sleeps or redeploys. Your data persists during active sessions but is not permanent.
-
-**For permanent cloud storage**, you can upgrade to:
-- **Google Sheets** as a backend (free)
-- **Supabase** or **PlanetScale** (free tier available)
-- **Streamlit `st.session_state`** with file download/upload for data backup
-
----
-
-## 🔮 Future Ideas
-
-- CSV import/export for bank statements
-- Monthly budget goals with alerts
-- Recurring transactions (salary, rent, subscriptions)
-- Multi-currency support
-- Bill reminders
-- AI-powered spending insights
-- Cloud database integration for permanent storage
-
----
-
-## 🛠️ Tech Stack
-
-- **Python 3.8+**
-- **Streamlit** — Web UI framework
-- **Plotly** — Interactive charts
-- **Pandas** — Data manipulation
-- **SQLite** — Local database (built into Python)
+- `app.py` — Streamlit interface
+- `database.py` — SQLite storage, authentication, migrations, and user-scoped records
+- `finance_tools.py` — SIP estimates, expense forecasting, and financial insights
+- `market_data.py` — timestamped market data fetches
+- `reporting.py` — Excel exports and PDF report generation
+- `sample_data.py` — guest-only demo data loader; rejects regular accounts
+- `.streamlit/config.toml` — theme and server settings
+- `requirements.txt` — Python package dependencies
