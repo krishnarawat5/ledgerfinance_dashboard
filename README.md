@@ -1,7 +1,7 @@
 # Ledger — Personal Finance Dashboard
 
-Live Demo
 Open Ledger Finance Dashboard (https://ledgerfinance-dashboard.streamlit.app/)
+
 A local-first personal finance app built with Streamlit, pandas, Plotly, and SQLite.
 
 ## Features
