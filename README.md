@@ -1,4 +1,4 @@
-# Ledger — Personal Finance Dashboard
+# Ledger Personal Finance Dashboard
 
 A local-first personal finance app built with Streamlit, pandas, Plotly, and SQLite.
 
