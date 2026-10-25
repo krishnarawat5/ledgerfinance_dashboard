@@ -226,7 +226,14 @@ def init_db():
         )
 
     conn.commit()
+    first_regular_user = cursor.execute(
+        "SELECT id FROM users WHERE username NOT LIKE 'trial-%' ORDER BY id LIMIT 1"
+    ).fetchone()
     conn.close()
+    # Recover safely if an older signup inserted the user but failed while
+    # claiming legacy records; unowned rows are still migrated on next start.
+    if first_regular_user:
+        claim_legacy_data(first_regular_user["id"])
 
 
 def _password_hash(password, salt):
@@ -302,8 +309,28 @@ def create_trial_guest_user():
 def claim_legacy_data(owner_id):
     conn = get_connection()
     with conn:
-        for table in ("transactions", "accounts", "transfers", "recurring", "budgets"):
+        for table in ("transactions", "transfers", "recurring", "budgets"):
             conn.execute(f"UPDATE {table} SET owner_id=? WHERE owner_id IS NULL", (owner_id,))
+
+        # Legacy databases may contain multiple unowned accounts with the
+        # same name. Claiming them in one UPDATE violates the per-user unique
+        # index on (owner_id, name). Merge their opening balances instead.
+        legacy_accounts = conn.execute(
+            "SELECT id, name, opening_balance FROM accounts WHERE owner_id IS NULL ORDER BY id"
+        ).fetchall()
+        for account in legacy_accounts:
+            owned = conn.execute(
+                "SELECT id FROM accounts WHERE owner_id=? AND name=? LIMIT 1",
+                (owner_id, account["name"]),
+            ).fetchone()
+            if owned:
+                conn.execute(
+                    "UPDATE accounts SET opening_balance=opening_balance+? WHERE id=?",
+                    (account["opening_balance"], owned["id"]),
+                )
+                conn.execute("DELETE FROM accounts WHERE id=?", (account["id"],))
+            else:
+                conn.execute("UPDATE accounts SET owner_id=? WHERE id=?", (owner_id, account["id"]))
         conn.execute("INSERT OR IGNORE INTO accounts (name, opening_balance, owner_id) VALUES ('Cash', 0, ?)", (owner_id,))
     conn.close()
 
